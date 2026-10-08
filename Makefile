@@ -14,6 +14,9 @@ LUCI_PKGARCH:=all
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE NOTICE
 PKG_MAINTAINER:=Corey Wong <coreymails@gmail.com>
+# luci.mk writes these two into the package, not PKG_MAINTAINER or a URL of ours
+LUCI_MAINTAINER:=$(PKG_MAINTAINER)
+LUCI_URL:=https://github.com/coreywonggithub/luci-theme-aquamarine
 
 # On removal, hand LuCI back to a theme that is still installed: an active
 # theme whose files are gone leaves every page an error.
