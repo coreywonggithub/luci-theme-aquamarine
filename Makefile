@@ -33,6 +33,14 @@ define Package/luci-theme-aquamarine/postrm
 		;;
 	esac
 	uci commit luci
+	# opkg (OpenWrt 24.10) leaves the two variant links and the emptied folders behind; apk does not
+	for v in aquamarine-dark aquamarine-light; do
+		[ -L "/www/luci-static/$$v" ] && rm -f "/www/luci-static/$$v"
+	done
+	rmdir /www/luci-static/aquamarine /usr/share/ucode/luci/template/themes/aquamarine-dark \
+		/usr/share/ucode/luci/template/themes/aquamarine-light \
+		/usr/share/ucode/luci/template/themes/aquamarine 2>/dev/null
+	exit 0
 }
 endef
 

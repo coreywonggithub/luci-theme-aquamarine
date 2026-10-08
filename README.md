@@ -88,7 +88,10 @@ serves every router of that OpenWrt version.
 - **OpenWrt 25.12** (r33249, LuCI 25.12 branch): 40 pages, in light
   and dark, at laptop and phone widths; install, upgrade and removal with
   `test/install-test.sh`. Running on a Wi-Fi 7 travel router (MediaTek Filogic).
-- **OpenWrt 24.10**: see the release notes for the version you download.
+- **OpenWrt 24.10** (24.10.8, LuCI 24.10 branch): install, upgrade and removal with
+  `test/install-test.sh` (opkg), and the ten pages above in light and dark at laptop and phone
+  widths, with no script errors from the theme. The login page's "uci/get: Access denied" is LuCI
+  24.10's own: it shows under Bootstrap too.
 
 Any recent browser: the theme uses CSS custom properties, `color-mix()` and
 `:is()` (Chrome and Edge 111, Safari 16.2, Firefox 113, or later).
@@ -102,7 +105,11 @@ Any recent browser: the theme uses CSS custom properties, `color-mix()` and
 - **A flat look:** delete the block headed "Glow" at the end of
   `aquamarine.css`.
 - **Screenshots:** `tools/screenshots.mjs` takes this README's pictures from any
-  LuCI with Aquamarine active (Node 22 or later and a Chromium, nothing from npm).
+  LuCI with Aquamarine active (Node 22 or later and a Chromium, nothing from npm), and
+  exits 1 if a page throws a script error.
+- **The 24.10 package:** `tools/make-ipk.sh` packs the files of the 25.12 build with the
+  24.10 SDK's own `ipkg-build` (the SDK cannot compile LuCI's own parts without OpenWrt's
+  base sources; the theme has nothing to compile).
 
 ## Licence
 

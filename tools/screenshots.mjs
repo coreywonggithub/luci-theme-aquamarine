@@ -73,6 +73,7 @@ function cdp(ws) {
 			waiting.set(n, { res, rej });
 			ws.send(JSON.stringify({ id: n, method, params }));
 		}),
+		on: (method, fn) => listeners.push((m) => { if (m.method === method) fn(m.params); }),
 		once: (method, ms) => new Promise((res) => {
 			const t = setTimeout(() => res(null), ms);
 			const l = (m) => { if (m.method === method) { clearTimeout(t); listeners.splice(listeners.indexOf(l), 1); res(m); } };
@@ -99,12 +100,17 @@ try {
 	const c = cdp(ws);
 	await c.send('Page.enable');
 	await c.send('Network.enable');
+	await c.send('Runtime.enable');
+	// a script error on a page is a broken page whatever the picture shows: count them per shot
+	let errors = [];
+	c.on('Runtime.exceptionThrown', (p) => errors.push(String(p.exceptionDetails?.exception?.description || p.exceptionDetails?.text).split('\n')[0].slice(0, 160)));
 	const cookie = await login();
 	const host = new URL(opt.url).hostname;
 	mkdirSync(opt.out, { recursive: true });
 
 	for (const [name, path, width, height, scheme, extra] of SHOTS) {
 		if (only.length && !only.includes(name)) continue;
+		errors = [];
 		await c.send('Network.clearBrowserCookies');
 		if (extra !== 'logout')
 			await c.send('Network.setCookie', { name: cookie.name, value: cookie.value, domain: host, path: '/' });
@@ -131,7 +137,8 @@ try {
 		const shot = await c.send('Page.captureScreenshot', { format: 'png' });
 		const file = join(opt.out, `${name}.png`);
 		writeFileSync(file, Buffer.from(shot.data, 'base64'));
-		console.log(`${file}  ${width}x${height} ${scheme}`);
+		console.log(`${file}  ${width}x${height} ${scheme}${errors.length ? `  SCRIPT ERRORS: ${errors.join(' | ')}` : ''}`);
+		if (errors.length) exitCode = 1;
 	}
 	ws.close();
 } catch (e) {

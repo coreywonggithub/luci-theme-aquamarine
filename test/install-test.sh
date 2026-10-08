@@ -8,7 +8,8 @@
 #
 # OpenWrt 25.12 uses apk, 24.10 opkg; the test uses whichever the root filesystem
 # has. NOSCRIPTS=1 removes the package without its scripts, as a package with no
-# removal script would: steps 4 and 5 must then fail (that is the negative test).
+# removal script would (apk --no-scripts; for opkg its removal scripts are deleted
+# first): steps 4 and 5 must then fail (that is the negative test).
 set -euo pipefail
 [ $# -eq 2 ] || { sed -n '2,12p' "$0"; exit 2; }
 ROOTFS="$(readlink -f "$1")"
@@ -36,8 +37,11 @@ if command -v apk >/dev/null; then
 	[ "$NOSCRIPTS" = 1 ] && NOSCRIPTS_FLAG=--no-scripts
 else
 	install() { opkg install "$pkg" >/tmp/pm.log 2>&1; }
-	remove() { opkg remove $NOSCRIPTS_FLAG luci-theme-aquamarine >/tmp/pm.log 2>&1; }
-	[ "$NOSCRIPTS" = 1 ] && NOSCRIPTS_FLAG=--noaction-scripts
+	# opkg cannot skip scripts: drop the installed package's removal scripts instead
+	remove() {
+		[ "$NOSCRIPTS" = 1 ] && rm -f /usr/lib/opkg/info/luci-theme-aquamarine.postrm /usr/lib/opkg/info/luci-theme-aquamarine.prerm
+		opkg remove luci-theme-aquamarine >/tmp/pm.log 2>&1
+	}
 fi
 
 # a fresh system's first boot: every first-boot script runs once
