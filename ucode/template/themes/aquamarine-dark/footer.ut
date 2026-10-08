@@ -1,0 +1,5 @@
+{#
+ Aquamarine, always dark: the same templates; header.ut sees theme == 'aquamarine-dark'.
+ Licensed to the public under the Apache License 2.0.
+-#}
+{% include('themes/aquamarine/footer') %}

@@ -1,0 +1,28 @@
+#!/bin/sh
+# Register Aquamarine (follows the device's light or dark setting) and its two
+# fixed variants. The first install also makes it the active theme; later runs
+# (a package upgrade, or a firmware upgrade that keeps settings) leave the
+# choice alone and only add a variant that is missing.
+
+changed=0
+first=0
+
+set_opt() {
+	if ! uci -q get "luci.$1" >/dev/null; then
+		uci set "luci.$1=$2"
+		changed=1
+	fi
+}
+
+uci -q get luci.themes.Aquamarine >/dev/null || first=1
+set_opt themes.Aquamarine /luci-static/aquamarine
+set_opt themes.AquamarineDark /luci-static/aquamarine-dark
+set_opt themes.AquamarineLight /luci-static/aquamarine-light
+
+if [ "$first" = 1 ] && [ "$PKG_UPGRADE" != 1 ]; then
+	uci set luci.main.mediaurlbase=/luci-static/aquamarine
+	changed=1
+fi
+
+[ "$changed" = 1 ] && uci commit luci
+exit 0

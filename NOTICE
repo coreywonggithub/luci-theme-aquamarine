@@ -1,0 +1,20 @@
+Aquamarine theme for LuCI
+Copyright 2026 Corey Wong
+
+This theme is derived from luci-theme-bootstrap, part of LuCI
+(https://github.com/openwrt/luci), licensed under the Apache License 2.0:
+
+  Copyright 2008 Steven Barth <steven@midlink.org>
+  Copyright 2012 David Menting <david@nut-bolt.nl>
+  Copyright 2008-2022 Jo-Philipp Wich <jo@mein.io>
+
+luci-theme-bootstrap is itself based on Bootstrap v1.4.0, Copyright 2011
+Twitter, Inc, licensed under the Apache License 2.0.
+
+Changes: a new colour palette (light and dark) and type, a restyled header
+with line icons, cards with a soft glow in dark mode, forms, buttons, tables,
+tabs, messages, dialogs and graphs, and a fold-away phone menu. Icons are drawn
+for this theme; no third-party artwork or fonts.
+
+Licensed under the Apache License, Version 2.0 (see LICENSE). You may obtain a
+copy at http://www.apache.org/licenses/LICENSE-2.0

@@ -1,0 +1,916 @@
+/*
+ * Aquamarine for LuCI: the look itself.
+ *
+ * The header tags the page <html data-theme="aquamarine"> and links this file
+ * after cascade.css (the base layer, derived from luci-theme-bootstrap) and
+ * mobile.css, so every rule here sits under [data-theme="aquamarine"] and wins
+ * over the base by that one attribute. Markup and behaviour are LuCI's own:
+ * this file changes colours, type, icons and depth, on every LuCI page alike.
+ *
+ * The idea is a network console (dark slate, one blue accent, colour-coded
+ * status, line icons, gridded graphs), drawn from scratch: no third-party
+ * artwork, fonts or files. Nothing is fetched, because the router may have
+ * no internet while this page is open; icons are inline SVG masks.
+ *
+ * Graph series: blue for download, orange for upload. The pair passes a
+ * colour-blind separation check in both modes (OKLab dE about 28 protan,
+ * 2026-10-06), and each stat carries an arrow, so colour is never alone.
+ */
+
+/* ------------------------------------------------------------------ *
+ *  Tokens: console palette (light first, dark below)
+ * ------------------------------------------------------------------ */
+
+:root[data-theme="aquamarine"] {
+	--aq-page: #eef2f6;
+	--aq-card: #ffffff;
+	--aq-card-2: #f5f7fa;
+	--aq-field: #f7f9fc;
+	--aq-line: rgba(15, 30, 55, .10);
+	--aq-line-2: rgba(15, 30, 55, .22);
+	--aq-text: #0f1824;
+	--aq-text-2: #536073;
+	--aq-text-3: #7d8899;
+	--aq-accent: #1a6fe0;
+	--aq-accent-2: #155ec2;
+	--aq-accent-3: #124f9f;
+	--aq-accent-bg: #e8f1fe;
+	--aq-on-accent: #ffffff;
+	--aq-ok: #0f7a48;
+	--aq-ok-bg: #e3f5ec;
+	--aq-warn: #8a5800;
+	--aq-warn-bg: #fdf1db;
+	--aq-err: #c4302b;
+	--aq-err-bg: #fdecec;
+	--aq-info: #134f9e;
+	--aq-overlay: rgba(12, 20, 32, .45);
+	--aq-shadow: 0 1px 2px rgba(16, 32, 56, .06);
+	--aq-pop: 0 12px 32px rgba(16, 32, 56, .14);
+	--aq-down: #1a6fe0;
+	--aq-up: #d9690f;
+	--aq-third: #c4302b;
+	--aq-plot: #fbfcfe;
+	--aq-grid: rgba(15, 30, 55, .06);
+	--aq-brand: linear-gradient(135deg, #3fc8d8, #1a6fe0 55%, #1550b0);
+
+	/* the base layer's tokens (cascade.css, mobile.css) */
+	--base-page: var(--aq-page);
+	--base-card: var(--aq-card);
+	--base-card-2: var(--aq-card-2);
+	--base-line: var(--aq-line);
+	--base-line-strong: var(--aq-line-2);
+	--base-text: var(--aq-text);
+	--base-text-2: var(--aq-text-2);
+	--base-text-3: var(--aq-text-3);
+	--base-accent: var(--aq-accent);
+	--base-accent-bg: var(--aq-accent-bg);
+	--base-on-accent: var(--aq-on-accent);
+	--base-ok-bg: var(--aq-ok-bg);
+	--base-ok-text: var(--aq-ok);
+	--base-warn-bg: var(--aq-warn-bg);
+	--base-warn-text: var(--aq-warn);
+	--base-err-bg: var(--aq-err-bg);
+	--base-err-text: var(--aq-err);
+	--base-info-bg: var(--aq-accent-bg);
+	--base-info-text: var(--aq-info);
+	--base-focus: 0 0 0 3px rgba(26, 111, 224, .22);
+	--base-radius: 8px;
+	--base-radius-card: 12px;
+
+	/* the upstream bootstrap tokens under them */
+	--background-color-h: 214;
+	--background-color-s: 30%;
+	--text-color-h: 214;
+	--text-color-s: 30%;
+	--primary-color-high: var(--aq-accent);
+	--primary-color-medium: var(--aq-accent-2);
+	--primary-color-low: var(--aq-accent-3);
+}
+
+:root[data-theme="aquamarine"][data-darkmode="true"] {
+	--aq-page: #0c1117;
+	--aq-card: #141b24;
+	--aq-card-2: #1a2330;
+	--aq-field: #0f151d;
+	--aq-line: rgba(148, 170, 200, .12);
+	--aq-line-2: rgba(148, 170, 200, .24);
+	--aq-text: #e7ecf3;
+	--aq-text-2: #98a5b7;
+	--aq-text-3: #6e7a8c;
+	--aq-accent: #4b9bff;
+	--aq-accent-2: #3b8cf0;
+	--aq-accent-3: #2a6fd0;
+	--aq-accent-bg: rgba(75, 155, 255, .14);
+	--aq-on-accent: #05101e;
+	--aq-ok: #45d494;
+	--aq-ok-bg: rgba(63, 209, 143, .13);
+	--aq-warn: #f3b84f;
+	--aq-warn-bg: rgba(243, 183, 79, .13);
+	--aq-err: #ff8080;
+	--aq-err-bg: rgba(255, 125, 125, .13);
+	--aq-info: #9cc8ff;
+	--aq-overlay: rgba(4, 7, 12, .66);
+	--aq-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .025);
+	--aq-pop: 0 16px 40px rgba(0, 0, 0, .5);
+	--aq-down: #3b8cf0;
+	--aq-up: #d66f24;
+	--aq-third: #e2524f;
+	--aq-plot: #10161e;
+	--aq-grid: rgba(148, 170, 200, .07);
+	--aq-brand: linear-gradient(135deg, #4fd3e0, #2f86f0 55%, #1d5cc4);
+
+	--base-focus: 0 0 0 3px rgba(75, 155, 255, .30);
+
+	--background-color-s: 28%;
+	--background-color-l: 11.5%;
+	--text-color-s: 25%;
+	--text-color-l: 92%;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Tokens: the Beryl 7 travel panel (same palette; unused elsewhere)
+ *  panel.css loads after this file and its dark rule is (0,2,1), so the
+ *  block below matches on data-darkmode too, which the header always
+ *  sets ("true" or "false"): (0,3,1) wins in both modes. The values follow
+ *  the --aq-* tokens, which switch between light and dark on :root.
+ * ------------------------------------------------------------------ */
+
+html[data-theme="aquamarine"] .travel-panel,
+html[data-theme="aquamarine"][data-darkmode] .travel-panel {
+	--tp-page: var(--aq-page);
+	--tp-card: var(--aq-card);
+	--tp-field: var(--aq-field);
+	--tp-border: var(--aq-line);
+	--tp-border-2: var(--aq-line-2);
+	--tp-text: var(--aq-text);
+	--tp-text-2: var(--aq-text-2);
+	--tp-accent: var(--aq-accent);
+	--tp-accent-bg: var(--aq-accent-bg);
+	--tp-on-accent: var(--aq-on-accent);
+	--tp-ok-bg: var(--aq-ok-bg);
+	--tp-ok-text: var(--aq-ok);
+	--tp-warn-bg: var(--aq-warn-bg);
+	--tp-warn-text: var(--aq-warn);
+	--tp-idle-bg: rgba(83, 96, 115, .09);
+	--tp-idle-text: var(--aq-text-2);
+	--tp-danger-text: var(--aq-err);
+	--tp-overlay: var(--aq-overlay);
+}
+
+html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
+	color-scheme: dark;
+
+	--tp-idle-bg: rgba(148, 170, 200, .09);
+}
+
+/* ------------------------------------------------------------------ *
+ *  Icons: line drawings on a 24 px grid (1.8 stroke, round ends), used
+ *  as masks so they take the colour of whatever paints them.
+ * ------------------------------------------------------------------ */
+
+:root[data-theme="aquamarine"] {
+	--aq-i-router: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11.5' width='18' height='8' rx='2.5'/%3E%3Cpath d='M7 11.5L5.4 4.2M17 11.5l1.6-7.3M7.5 15.5h.01M10.5 15.5h.01M13.5 15.5h.01'/%3E%3C/svg%3E");
+	--aq-i-pulse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12h4l2.5-6 5 12 2.5-6h4'/%3E%3C/svg%3E");
+	--aq-i-key: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='15' r='4'/%3E%3Cpath d='M10.9 12.1L19 4M15.5 7.5l2.5 2.5M13.5 9.5l2 2'/%3E%3C/svg%3E");
+	--aq-i-globe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'/%3E%3C/svg%3E");
+	--aq-i-tower: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 11.5V20M8.6 14.4a5 5 0 0 1 0-7M15.4 14.4a5 5 0 0 0 0-7M5.6 17.4a9.2 9.2 0 0 1 0-13M18.4 17.4a9.2 9.2 0 0 0 0-13'/%3E%3Ccircle cx='12' cy='10.9' r='1.3'/%3E%3C/svg%3E");
+	--aq-i-devices: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='5' width='13' height='9' rx='1.5'/%3E%3Cpath d='M1.5 17.5h14'/%3E%3Crect x='17.5' y='8.5' width='5' height='10.5' rx='1.2'/%3E%3C/svg%3E");
+	--aq-i-wifi: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 9a14 14 0 0 1 19 0M5.7 12.4a9.5 9.5 0 0 1 12.6 0M8.9 15.8a5 5 0 0 1 6.2 0'/%3E%3Ccircle cx='12' cy='19.2' r='1.1' fill='%23000' stroke='none'/%3E%3C/svg%3E");
+	--aq-i-map: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 4.5L3.5 6.8v12.7L9 17.2l6 2.3 5.5-2.3V4.5L15 6.8z'/%3E%3Cpath d='M9 4.5v12.7M15 6.8v12.7'/%3E%3C/svg%3E");
+	--aq-i-sliders: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h9M17 7h3M4 17h3M11 17h9'/%3E%3Ccircle cx='15' cy='7' r='2'/%3E%3Ccircle cx='9' cy='17' r='2'/%3E%3C/svg%3E");
+	--aq-i-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v13M6 12l6 6 6-6'/%3E%3C/svg%3E");
+	--aq-i-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V6M6 12l6-6 6 6'/%3E%3C/svg%3E");
+	/* top-level menu items */
+	--aq-i-suitcase: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='6' y='6.5' width='12' height='13' rx='2.2'/%3E%3Cpath d='M10 6.5V4.2h4v2.3M9.8 10v6M14.2 10v6M8.6 19.5v1.3M15.4 19.5v1.3'/%3E%3C/svg%3E");
+	--aq-i-gauge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.6 17.5a8.6 8.6 0 1 1 14.8 0'/%3E%3Cpath d='M12 13.6l3.6-4.4'/%3E%3Ccircle cx='12' cy='13.8' r='1.3'/%3E%3C/svg%3E");
+	--aq-i-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='6.5' y='6.5' width='11' height='11' rx='2'/%3E%3Crect x='9.6' y='9.6' width='4.8' height='4.8' rx='.8'/%3E%3Cpath d='M9.5 3.6v2.9M14.5 3.6v2.9M9.5 17.5v2.9M14.5 17.5v2.9M3.6 9.5h2.9M3.6 14.5h2.9M17.5 9.5h2.9M17.5 14.5h2.9'/%3E%3C/svg%3E");
+	--aq-i-apps: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='13.5' y='4' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='4' y='13.5' width='6.5' height='6.5' rx='1.6'/%3E%3Crect x='13.5' y='13.5' width='6.5' height='6.5' rx='1.6'/%3E%3C/svg%3E");
+	--aq-i-topology: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='3.5' width='6' height='5' rx='1.2'/%3E%3Crect x='3' y='15.5' width='6' height='5' rx='1.2'/%3E%3Crect x='15' y='15.5' width='6' height='5' rx='1.2'/%3E%3Cpath d='M12 8.5V12M6 15.5V12h12v3.5'/%3E%3C/svg%3E");
+	--aq-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10'/%3E%3Cpath d='M14.5 8l4 4-4 4M18.5 12H9.5'/%3E%3C/svg%3E");
+	/* the brand mark: a cut gemstone (an aquamarine), white on the tile */
+	--aq-i-gem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4.5h10l4 5-9 11-9-11z'/%3E%3Cpath d='M3 9.5h18M10 4.5L8 9.5l4 11 4-11-2-5' opacity='.62'/%3E%3C/svg%3E");
+}
+
+/* ================================================================== *
+ *  LuCI: every page
+ * ================================================================== */
+
+[data-theme="aquamarine"] body {
+	background: var(--aq-page);
+	color: var(--aq-text);
+}
+
+/* a faint wash of the accent at the top of the page, dark mode only */
+[data-theme="aquamarine"][data-darkmode="true"] body {
+	background:
+		radial-gradient(1100px 420px at 50% -200px, rgba(75, 155, 255, .10), transparent 70%) no-repeat,
+		var(--aq-page);
+}
+
+[data-theme="aquamarine"] h2 {
+	font-weight: 600;
+	letter-spacing: -.01em;
+}
+
+/* ---- header: the console bar ---------------------------------------- */
+
+[data-theme="aquamarine"] header {
+	background: var(--aq-card);
+	border-bottom: .5px solid var(--aq-line);
+	box-shadow: var(--aq-shadow);
+}
+
+[data-theme="aquamarine"] header .brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-weight: 600;
+}
+
+[data-theme="aquamarine"] header .brand::before {
+	content: "";
+	flex: none;
+	width: 28px;
+	height: 28px;
+	border-radius: 8px;
+	background: var(--aq-i-gem) center / 18px no-repeat, var(--aq-brand);
+	box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .25);
+}
+
+[data-theme="aquamarine"] .nav > li > a {
+	font-weight: 500;
+}
+
+[data-theme="aquamarine"] .dropdown-menu,
+[data-theme="aquamarine"] .nav .dropdown-menu {
+	box-shadow: var(--aq-pop);
+}
+
+/* each top-level menu item leads with its icon (menu-aquamarine.js names them) */
+[data-theme="aquamarine"] #topmenu > li[data-menu] > a {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+}
+
+[data-theme="aquamarine"] #topmenu > li[data-menu] > a::before {
+	content: "";
+	flex: none;
+	width: 16px;
+	height: 16px;
+	background: currentColor;
+	-webkit-mask: var(--aq-nav, none) center / contain no-repeat;
+	mask: var(--aq-nav, none) center / contain no-repeat;
+}
+
+[data-theme="aquamarine"] #topmenu > li[data-menu] > a.menu::after {
+	margin-top: 0;
+}
+
+/* icons make the bar wider: tighter items keep it on one line at 1000 px,
+   even with LuCI's "Unsaved Changes" pill beside "Refreshing" */
+@media (min-width: 861px) {
+	[data-theme="aquamarine"] .nav > li > a {
+		margin: 0 1px;
+		padding: 7px 9px;
+	}
+
+	[data-theme="aquamarine"] #topmenu > li[data-menu] > a {
+		gap: 6px;
+	}
+
+	/* the icon already marks a menu; its caret only costs width */
+	[data-theme="aquamarine"] #topmenu > li[data-menu] > a.menu::after {
+		display: none;
+	}
+
+	[data-theme="aquamarine"] #indicators [data-indicator] {
+		padding: 3px 9px;
+	}
+}
+
+[data-theme="aquamarine"] #topmenu > li[data-menu="travel"] { --aq-nav: var(--aq-i-suitcase); }
+[data-theme="aquamarine"] #topmenu > li[data-menu="status"] { --aq-nav: var(--aq-i-gauge); }
+[data-theme="aquamarine"] #topmenu > li[data-menu="system"] { --aq-nav: var(--aq-i-chip); }
+[data-theme="aquamarine"] #topmenu > li[data-menu="services"] { --aq-nav: var(--aq-i-apps); }
+[data-theme="aquamarine"] #topmenu > li[data-menu="network"] { --aq-nav: var(--aq-i-topology); }
+[data-theme="aquamarine"] #topmenu > li[data-menu="logout"] { --aq-nav: var(--aq-i-logout); }
+
+/* status pills in the bar carry a dot, like every status here */
+[data-theme="aquamarine"] #indicators > span,
+[data-theme="aquamarine"] #indicators [data-indicator] {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+[data-theme="aquamarine"] #indicators > span::before,
+[data-theme="aquamarine"] #indicators [data-indicator]::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+/* ---- sections: cards with small-capital labels ---------------------- */
+
+[data-theme="aquamarine"] .cbi-section,
+[data-theme="aquamarine"] .cbi-map > fieldset,
+[data-theme="aquamarine"] .cbi-tblsection {
+	box-shadow: var(--aq-shadow);
+}
+
+[data-theme="aquamarine"] .cbi-section .cbi-section,
+[data-theme="aquamarine"] .cbi-section .cbi-tblsection,
+[data-theme="aquamarine"] .cbi-value > .cbi-section,
+[data-theme="aquamarine"] .cbi-value > .cbi-tblsection,
+[data-theme="aquamarine"] .cbi-tab .cbi-section,
+[data-theme="aquamarine"] .cbi-section-node .cbi-section,
+[data-theme="aquamarine"] #modal_overlay .cbi-section,
+[data-theme="aquamarine"] #modal_overlay .cbi-map > fieldset {
+	box-shadow: none;
+}
+
+[data-theme="aquamarine"] .cbi-section > h3,
+[data-theme="aquamarine"] .cbi-section > .cbi-title > h3,
+[data-theme="aquamarine"] .cbi-section > legend,
+[data-theme="aquamarine"] .cbi-map > fieldset > legend,
+[data-theme="aquamarine"] .cbi-tblsection > h3 {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--aq-text-2);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 18px;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+[data-theme="aquamarine"] .cbi-section > h3::before,
+[data-theme="aquamarine"] .cbi-section > .cbi-title > h3::before,
+[data-theme="aquamarine"] .cbi-section > legend::before,
+[data-theme="aquamarine"] .cbi-map > fieldset > legend::before,
+[data-theme="aquamarine"] .cbi-tblsection > h3::before {
+	content: "";
+	flex: none;
+	width: 3px;
+	height: 12px;
+	border-radius: 2px;
+	background: var(--aq-accent);
+}
+
+/* Status > Overview titles carry an inline "space-between" and a Hide
+   button: keep the title by its bar and push the button to the end */
+[data-theme="aquamarine"] .cbi-section > .cbi-title > h3 {
+	justify-content: flex-start !important;
+}
+
+[data-theme="aquamarine"] .cbi-section > .cbi-title > h3 > .label {
+	margin-left: auto;
+	letter-spacing: .04em;
+}
+
+/* ---- tables: quiet capitals on top, aligned figures below ----------- */
+
+[data-theme="aquamarine"] .table .th,
+[data-theme="aquamarine"] .table-titles .th,
+[data-theme="aquamarine"] .cbi-section-table-titles .th {
+	color: var(--aq-text-3);
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+}
+
+[data-theme="aquamarine"] .table .td {
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---- inputs sit a step below the card they are on ------------------- */
+
+[data-theme="aquamarine"] input:where(:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="file"], [type="range"], [type="image"])),
+[data-theme="aquamarine"] select,
+[data-theme="aquamarine"] textarea,
+[data-theme="aquamarine"] .cbi-dropdown:not(.btn):not(.cbi-button),
+[data-theme="aquamarine"] .cbi-input-text,
+[data-theme="aquamarine"] .cbi-input-password,
+[data-theme="aquamarine"] .cbi-input-select {
+	background-color: var(--aq-field);
+}
+
+/* ---- meters (memory, storage) --------------------------------------- */
+
+/* a thin bar with its figures above it, left-aligned like a readout */
+[data-theme="aquamarine"] .cbi-progressbar {
+	height: 6px;
+	margin: 1.7em 0 6px;
+	overflow: visible;
+	border: 0;
+	background: var(--aq-field);
+	box-shadow: inset 0 0 0 .5px var(--aq-line);
+}
+
+[data-theme="aquamarine"] .cbi-progressbar::before {
+	top: -1.7em;
+	right: 0;
+	padding: 0;
+	color: var(--aq-text-2);
+	font-size: 12px;
+	line-height: 1.5;
+	text-align: left;
+	font-variant-numeric: tabular-nums;
+}
+
+[data-theme="aquamarine"] .cbi-progressbar > div {
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--aq-accent-3), var(--aq-accent));
+}
+
+/* ---- messages carry a bar in their own colour ----------------------- */
+
+[data-theme="aquamarine"] .alert-message {
+	box-shadow: inset 3px 0 0 var(--aq-accent);
+}
+
+[data-theme="aquamarine"] .alert-message.warning {
+	box-shadow: inset 3px 0 0 var(--aq-warn);
+}
+
+[data-theme="aquamarine"] .alert-message.error,
+[data-theme="aquamarine"] .alert-message.danger {
+	box-shadow: inset 3px 0 0 var(--aq-err);
+}
+
+[data-theme="aquamarine"] .alert-message.success {
+	box-shadow: inset 3px 0 0 var(--aq-ok);
+}
+
+/* ---- dialogs ------------------------------------------------------------ */
+
+[data-theme="aquamarine"] #modal_overlay {
+	background: var(--aq-overlay);
+}
+
+[data-theme="aquamarine"] #modal_overlay > .modal {
+	box-shadow: var(--aq-pop);
+}
+
+/* ---- Status, Realtime Graphs ---------------------------------------
+ * LuCI draws these with inline styles (white box, black rules, blue and
+ * green series), so only !important reaches them. Series keep their
+ * legend: LuCI's blue becomes the console blue, its green the orange,
+ * its red the third colour; the load page keeps its own warm ramp. */
+
+[data-theme="aquamarine"] #view div[style*="border:1px solid #000"] {
+	border: .5px solid var(--aq-line) !important;
+	border-radius: 10px;
+	background: var(--aq-plot) !important;
+	overflow: hidden;
+}
+
+[data-theme="aquamarine"] #view div[style*="border:1px solid #000"] svg line {
+	stroke: var(--aq-line-2) !important;
+	stroke-width: 1 !important;
+	stroke-dasharray: 3 4;
+}
+
+[data-theme="aquamarine"] #view div[style*="border:1px solid #000"] svg text {
+	fill: var(--aq-text-2) !important;
+	font-size: 11px !important;
+	text-shadow: none !important;
+}
+
+[data-theme="aquamarine"] #view svg polyline[style*="stroke:blue"] {
+	fill: var(--aq-down) !important;
+	fill-opacity: .14 !important;
+	stroke: var(--aq-down) !important;
+	stroke-width: 1.6 !important;
+}
+
+[data-theme="aquamarine"] #view svg polyline[style*="stroke:green"] {
+	fill: var(--aq-up) !important;
+	fill-opacity: .12 !important;
+	stroke: var(--aq-up) !important;
+	stroke-width: 1.6 !important;
+}
+
+[data-theme="aquamarine"] #view svg polyline[style*="stroke:red"] {
+	fill: var(--aq-third) !important;
+	fill-opacity: .12 !important;
+	stroke: var(--aq-third) !important;
+	stroke-width: 1.6 !important;
+}
+
+[data-theme="aquamarine"] #view strong[style*="solid blue"] {
+	border-bottom-color: var(--aq-down) !important;
+}
+
+[data-theme="aquamarine"] #view strong[style*="solid green"] {
+	border-bottom-color: var(--aq-up) !important;
+}
+
+[data-theme="aquamarine"] #view strong[style*="solid red"] {
+	border-bottom-color: var(--aq-third) !important;
+}
+
+/* ================================================================== *
+ *  The travel panel
+ * ================================================================== */
+
+[data-theme="aquamarine"] .travel-panel {
+	border-radius: 0;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-card {
+	border-radius: 12px;
+	box-shadow: var(--aq-shadow);
+}
+
+/* card titles: small capitals in the second ink, after a line icon */
+
+[data-theme="aquamarine"] .travel-panel .tp-card > .tp-card-head .tp-h2 {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--tp-text-2);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 18px;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+[data-theme="aquamarine"] .travel-panel [data-card] > .tp-card-head .tp-h2::before,
+[data-theme="aquamarine"] .travel-panel .tp-more > .tp-card-head .tp-h2::before {
+	content: "";
+	flex: none;
+	width: 16px;
+	height: 16px;
+	background: var(--tp-accent);
+	-webkit-mask: var(--aq-icon) center / contain no-repeat;
+	mask: var(--aq-icon) center / contain no-repeat;
+}
+
+[data-theme="aquamarine"] .travel-panel [data-card="login"] { --aq-icon: var(--aq-i-key); }
+[data-theme="aquamarine"] .travel-panel [data-card="exit"] { --aq-icon: var(--aq-i-globe); }
+[data-theme="aquamarine"] .travel-panel [data-card="uplinks"] { --aq-icon: var(--aq-i-tower); }
+[data-theme="aquamarine"] .travel-panel [data-card="devices"] { --aq-icon: var(--aq-i-devices); }
+[data-theme="aquamarine"] .travel-panel [data-card="wifi"] { --aq-icon: var(--aq-i-wifi); }
+[data-theme="aquamarine"] .travel-panel [data-card="mode"] { --aq-icon: var(--aq-i-map); }
+[data-theme="aquamarine"] .travel-panel .tp-more { --aq-icon: var(--aq-i-sliders); }
+
+[data-theme="aquamarine"] .travel-panel .tp-h3 {
+	color: var(--tp-text-2);
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+}
+
+/* ---- the device card at the top: a tile with the router in it ------- */
+
+[data-theme="aquamarine"] .travel-panel .tp-head {
+	position: relative;
+	justify-content: center;
+	min-height: 76px;
+	padding-left: 72px;
+	background:
+		linear-gradient(120deg, color-mix(in srgb, var(--tp-accent) 9%, transparent), transparent 55%),
+		var(--tp-card);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-head::before,
+[data-theme="aquamarine"] .travel-panel .tp-head::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 14px;
+	width: 44px;
+	height: 44px;
+	margin-top: -22px;
+	border-radius: 12px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-head::before {
+	background: var(--tp-accent-bg);
+	box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--tp-accent) 35%, transparent);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-head::after {
+	background: var(--tp-accent);
+	-webkit-mask: var(--aq-i-router) center / 24px no-repeat;
+	mask: var(--aq-i-router) center / 24px no-repeat;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-title {
+	font-size: 19px;
+	font-weight: 600;
+	letter-spacing: -.01em;
+}
+
+/* ---- status pills: a dot, and a halo on the live ones ---------------- */
+
+[data-theme="aquamarine"] .travel-panel .tp-pill {
+	gap: 6px;
+	padding: 3px 10px 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-pill::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-pill.ok::before {
+	box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* ---- speed: a labelled card, arrows in the series colours, a grid --- */
+
+[data-theme="aquamarine"] .travel-panel .tp-speed {
+	position: relative;
+	padding-top: 44px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed::before {
+	content: "";
+	position: absolute;
+	top: 15px;
+	left: 14px;
+	width: 16px;
+	height: 16px;
+	background: var(--tp-accent);
+	-webkit-mask: var(--aq-i-pulse) center / contain no-repeat;
+	mask: var(--aq-i-pulse) center / contain no-repeat;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed::after {
+	content: "Throughput";
+	position: absolute;
+	top: 14px;
+	left: 38px;
+	color: var(--tp-text-2);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 18px;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed-row {
+	gap: 4px 36px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed .tp-k {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed .tp-k::before {
+	content: "";
+	flex: none;
+	width: 12px;
+	height: 12px;
+	background: var(--aq-down);
+	-webkit-mask: var(--aq-i-down) center / contain no-repeat;
+	mask: var(--aq-i-down) center / contain no-repeat;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-speed .tp-stat + .tp-stat .tp-k::before {
+	background: var(--aq-up);
+	-webkit-mask-image: var(--aq-i-up);
+	mask-image: var(--aq-i-up);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-big {
+	font-size: 30px;
+	font-weight: 600;
+	letter-spacing: -.02em;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-spark-box {
+	height: 108px;
+	border: .5px solid var(--tp-border);
+	border-radius: 8px;
+	background-color: var(--aq-plot);
+	background-image:
+		linear-gradient(to bottom, var(--aq-grid) 1px, transparent 1px),
+		linear-gradient(to right, var(--aq-grid) 1px, transparent 1px);
+	background-size: 100% 25%, 12.5% 100%;
+	background-position: 0 -1px, -1px 0;
+	overflow: hidden;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-spark {
+	height: 100%;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-spark-area {
+	fill: var(--aq-down);
+	opacity: .14;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-spark-down {
+	stroke: var(--aq-down);
+	stroke-width: 2;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-spark-up {
+	stroke: var(--aq-up);
+	stroke-width: 1.6;
+	opacity: 1;
+}
+
+/* ---- rows: square tiles instead of circles --------------------------- */
+
+[data-theme="aquamarine"] .travel-panel .tp-row-icon,
+[data-theme="aquamarine"] .travel-panel .tp-avatar {
+	border-radius: 10px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-row-icon {
+	background: var(--tp-accent-bg);
+	color: var(--tp-accent);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-row.is-away .tp-row-icon {
+	background: var(--tp-idle-bg);
+	color: var(--tp-text-2);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-kv-v,
+[data-theme="aquamarine"] .travel-panel .tp-row-sub {
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---- controls: tighter corners, a ring on focus ---------------------- */
+
+[data-theme="aquamarine"] .travel-panel .tp-btn,
+[data-theme="aquamarine"] .travel-panel a.tp-btn,
+[data-theme="aquamarine"] .travel-panel .tp-seg-btn,
+[data-theme="aquamarine"] .travel-panel .tp-kind-btn,
+[data-theme="aquamarine"] .travel-panel .tp-input,
+[data-theme="aquamarine"] .travel-panel .tp-select,
+[data-theme="aquamarine"] .travel-panel .tp-textarea {
+	border-radius: 8px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-btn.sm {
+	border-radius: 7px;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-btn.primary,
+[data-theme="aquamarine"] .travel-panel a.tp-btn.primary {
+	font-weight: 600;
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-input:focus,
+[data-theme="aquamarine"] .travel-panel .tp-select:focus,
+[data-theme="aquamarine"] .travel-panel .tp-textarea:focus {
+	box-shadow: 0 0 0 3px var(--tp-accent-bg);
+}
+
+/* a switch that is on keeps a white thumb, as consoles do */
+[data-theme="aquamarine"] .travel-panel .tp-switch-ctl.is-on .tp-switch-thumb {
+	background: #ffffff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+/* ---- notes, banners, suggestions: a bar in their own colour ---------- */
+
+[data-theme="aquamarine"] .travel-panel .tp-note.warn,
+[data-theme="aquamarine"] .travel-panel .tp-banner,
+[data-theme="aquamarine"] .travel-panel .tp-suggest {
+	box-shadow: inset 3px 0 0 var(--tp-warn-text);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-note.ok {
+	box-shadow: inset 3px 0 0 var(--tp-ok-text);
+}
+
+[data-theme="aquamarine"] .travel-panel .tp-note.info {
+	box-shadow: inset 3px 0 0 var(--tp-border-2);
+}
+
+/* ---- sheets ------------------------------------------------------------ */
+
+[data-theme="aquamarine"] .travel-panel .tp-sheet {
+	border: .5px solid var(--tp-border-2);
+	box-shadow: var(--aq-pop);
+}
+
+/* ---- laptop width: a dashboard instead of one phone column -----------
+ * From 980 px (a small laptop window, a tablet held sideways).
+ * The device strip, the throughput graph and More run across; the other
+ * cards pair up in DOM order (login and exit, sources and devices, Wi-Fi and
+ * mode), each pair as tall as its taller card. Sheets hang off .travel-panel,
+ * not .tp-wrap, so they are not grid items; a hidden card leaves at most one
+ * empty cell at the end. Phones keep the single column. */
+
+@media (min-width: 980px) {
+	[data-theme="aquamarine"] .travel-panel .tp-wrap {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: stretch;
+		gap: 16px;
+		max-width: 1160px;
+	}
+
+	[data-theme="aquamarine"] .travel-panel .tp-wrap > .tp-banner,
+	[data-theme="aquamarine"] .travel-panel .tp-head,
+	[data-theme="aquamarine"] .travel-panel .tp-suggest,
+	[data-theme="aquamarine"] .travel-panel .tp-speed,
+	[data-theme="aquamarine"] .travel-panel .tp-more {
+		grid-column: 1 / -1;
+	}
+
+	[data-theme="aquamarine"] .travel-panel .tp-spark-box {
+		height: 156px;
+	}
+}
+
+/* ==================================================================
+ *  Glow: light on surfaces, never on controls. A richer wash at the top of the page, the header
+ *  ending in an accent hairline that fades out at both ends, cards lit from their top edge with an accent
+ *  glow whose spot changes from card to card, and a brighter glow behind the travel panel's device card.
+ *  Dark mode carries it; light mode only gets the hairline. Nested sections stay flat (one card, not a
+ *  card in a card). Delete this block for a flat look.
+ * ================================================================== */
+
+[data-theme="aquamarine"][data-darkmode="true"] body {
+	background:
+		radial-gradient(800px 380px at 12% -120px, rgba(79, 211, 224, .12), transparent 70%) no-repeat,
+		radial-gradient(1300px 560px at 62% -240px, rgba(75, 155, 255, .24), transparent 70%) no-repeat,
+		var(--aq-page);
+}
+
+/* the header is sticky, so the hairline is a background layer, not a positioned pseudo-element */
+[data-theme="aquamarine"] header {
+	background:
+		linear-gradient(90deg, transparent 5%, color-mix(in srgb, var(--aq-accent) 70%, transparent) 35%,
+			color-mix(in srgb, #4fd3e0 60%, transparent) 65%, transparent 95%) bottom / 100% 1px no-repeat,
+		var(--aq-card);
+}
+
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-map > fieldset,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-tblsection,
+[data-theme="aquamarine"][data-darkmode="true"] .travel-panel .tp-card {
+	--aq-glow-at: 0% 0%;
+	background-image:
+		radial-gradient(520px 220px at var(--aq-glow-at), rgba(75, 155, 255, .14), transparent 70%),
+		linear-gradient(180deg, rgba(255, 255, 255, .045), transparent 160px);
+	box-shadow: var(--aq-shadow), inset 0 1px 0 rgba(140, 190, 255, .12);
+}
+
+/* where the glow sits: a five-step cycle over each card's place among its siblings, so neighbours never
+ * glow from the same spot and nothing moves between visits; places 1, 6, 11 keep the top left */
+[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+2) {
+	--aq-glow-at: 100% 0%;
+}
+
+[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+3) {
+	--aq-glow-at: 20% 100%;
+}
+
+[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+4) {
+	--aq-glow-at: 70% 0%;
+}
+
+[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n) {
+	--aq-glow-at: 100% 100%;
+}
+
+/* the device card at the top: a brighter glow, aquamarine into blue, behind the router tile */
+[data-theme="aquamarine"][data-darkmode="true"] .travel-panel .tp-head {
+	background:
+		radial-gradient(480px 200px at 8% 50%, rgba(79, 211, 224, .16), transparent 70%),
+		radial-gradient(700px 260px at 55% -40%, rgba(75, 155, 255, .20), transparent 70%),
+		var(--tp-card);
+	box-shadow: var(--aq-shadow), inset 0 1px 0 rgba(140, 190, 255, .16);
+}
+
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-section .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-section .cbi-tblsection,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-value > .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-value > .cbi-tblsection,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-tab .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] .cbi-section-node .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] #modal_overlay .cbi-section,
+[data-theme="aquamarine"][data-darkmode="true"] #modal_overlay .cbi-map > fieldset {
+	background-image: none;
+	box-shadow: none;
+}
