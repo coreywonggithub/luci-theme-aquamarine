@@ -47,20 +47,20 @@ Download the package for your OpenWrt version from the
 and copy it to the router, for example:
 
 ```sh
-scp -O luci-theme-aquamarine-1.0.0-r1.apk root@192.168.1.1:/tmp/
+scp -O luci-theme-aquamarine-1.0.1-r1.apk root@192.168.1.1:/tmp/
 ```
 
 **OpenWrt 25.12** (apk). A single package file is not signed on its own (only
 OpenWrt's package lists are), so apk needs to be told to accept it:
 
 ```sh
-apk add --allow-untrusted /tmp/luci-theme-aquamarine-1.0.0-r1.apk
+apk add --allow-untrusted /tmp/luci-theme-aquamarine-1.0.1-r1.apk
 ```
 
 **OpenWrt 24.10** (opkg):
 
 ```sh
-opkg install /tmp/luci-theme-aquamarine_1.0.0-r1_all.ipk
+opkg install /tmp/luci-theme-aquamarine_1.0.1-r1_all.ipk
 ```
 
 The first install makes Aquamarine the active theme. Reload the page. To switch

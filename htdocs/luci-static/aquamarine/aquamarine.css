@@ -284,6 +284,21 @@ html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
 		display: none;
 	}
 
+	/* The dropdown sits right under its item. Bootstrap placed it at 40 px, the height of its own items; these
+	   are 34 px, which left a 6 px strip where the pointer was over neither, so every menu closed on the way
+	   down to its entries (Corey, 2026-10-09: "if the mouse moved to the drop-down, the drop-down disappears").
+	   A pointer that slips off for a moment gets 150 ms before the menu closes; keyboard focus opens it too. */
+	[data-theme="aquamarine"] #topmenu > li > ul.dropdown-menu {
+		top: 100%;
+		transition: left 0s 150ms;
+	}
+
+	[data-theme="aquamarine"] #topmenu > li.dropdown:hover > ul.dropdown-menu,
+	[data-theme="aquamarine"] #topmenu > li.dropdown:focus-within > ul.dropdown-menu {
+		left: 0;
+		transition-delay: 0s;
+	}
+
 	[data-theme="aquamarine"] #indicators [data-indicator] {
 		padding: 3px 9px;
 	}
