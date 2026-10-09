@@ -1,8 +1,8 @@
 # Aquamarine for LuCI
 
-A network-console theme for OpenWrt's web interface: dark slate or cool light,
-one blue accent, line icons, gridded graphs, a soft glow on cards in dark mode,
-and a phone layout that folds the menu away.
+A network-console theme for OpenWrt's web interface: dark slate or chambray
+blue, one blue accent, line icons, gridded graphs, a soft glow on the cards, and
+a phone layout that folds the menu away.
 
 ![Status overview, dark](docs/screenshots/overview-dark.png)
 
@@ -21,9 +21,14 @@ and a phone layout that folds the menu away.
   figure also labelled, so colour is never the only cue.
 - **Phone first.** Below 860 px the menu folds behind a button and tables
   become label and value blocks, so no page scrolls sideways.
-- **Glow, not glitter.** In dark mode the page has a soft blue wash and each
-  card a glow whose spot changes from card to card. Buttons, fields and
-  switches stay flat: a control should always look like a control.
+- **Light is not white.** The light mode is chambray, a light blue shirt
+  rather than white paper: the dark mode's mirror. Its text colours were
+  deepened for it, so even the faintest labels read better than they did on
+  white, and fields stay lighter than the cards they sit on.
+- **Glow, not glitter.** The page has a soft blue wash at the top and each card
+  a glow whose spot changes from card to card: lighter than the slate in dark
+  mode, a deeper blue than the tint in light. Buttons, fields and switches stay
+  flat: a control should always look like a control.
 - **Small.** About 60 KB installed. No fonts, no frameworks, no build step.
 
 ## Screenshots
@@ -47,20 +52,20 @@ Download the package for your OpenWrt version from the
 and copy it to the router, for example:
 
 ```sh
-scp -O luci-theme-aquamarine-1.0.1-r2.apk root@192.168.1.1:/tmp/
+scp -O luci-theme-aquamarine-1.0.2-r1.apk root@192.168.1.1:/tmp/
 ```
 
 **OpenWrt 25.12** (apk). A single package file is not signed on its own (only
 OpenWrt's package lists are), so apk needs to be told to accept it:
 
 ```sh
-apk add --allow-untrusted /tmp/luci-theme-aquamarine-1.0.1-r2.apk
+apk add --allow-untrusted /tmp/luci-theme-aquamarine-1.0.2-r1.apk
 ```
 
 **OpenWrt 24.10** (opkg):
 
 ```sh
-opkg install /tmp/luci-theme-aquamarine_1.0.1-r2_all.ipk
+opkg install /tmp/luci-theme-aquamarine_1.0.2-r1_all.ipk
 ```
 
 The first install makes Aquamarine the active theme. Reload the page. To switch

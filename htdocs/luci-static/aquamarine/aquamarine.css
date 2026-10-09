@@ -22,19 +22,20 @@
  * ------------------------------------------------------------------ */
 
 :root[data-theme="aquamarine"] {
-	--aq-page: #eef2f6;
-	--aq-card: #ffffff;
-	--aq-card-2: #f5f7fa;
+	/* light is Chambray, a light blue shirt rather than white paper (Corey, 2026-10-09): the dark slate's mirror */
+	--aq-page: #d3e2f1;
+	--aq-card: #e8f1fa;
+	--aq-card-2: #dde8f4;
 	--aq-field: #f7f9fc;
 	--aq-line: rgba(15, 30, 55, .10);
 	--aq-line-2: rgba(15, 30, 55, .22);
 	--aq-text: #0f1824;
 	--aq-text-2: #536073;
-	--aq-text-3: #7d8899;
-	--aq-accent: #1a6fe0;
-	--aq-accent-2: #155ec2;
+	--aq-text-3: #687385;		/* 4.2:1 on a card; #7d8899 fell to 3.1 on the tint */
+	--aq-accent: #1664cf;		/* 4.9:1 on a card as text, white on it 5.6:1 */
+	--aq-accent-2: #1459bb;
 	--aq-accent-3: #124f9f;
-	--aq-accent-bg: #e8f1fe;
+	--aq-accent-bg: #d4e4fa;	/* a selected state must stand out from the tinted card */
 	--aq-on-accent: #ffffff;
 	--aq-ok: #0f7a48;
 	--aq-ok-bg: #e3f5ec;
@@ -44,8 +45,8 @@
 	--aq-err-bg: #fdecec;
 	--aq-info: #134f9e;
 	--aq-overlay: rgba(12, 20, 32, .45);
-	--aq-shadow: 0 1px 2px rgba(16, 32, 56, .06);
-	--aq-pop: 0 12px 32px rgba(16, 32, 56, .14);
+	--aq-shadow: 0 1px 2px rgba(16, 32, 56, .07);
+	--aq-pop: 0 12px 32px rgba(16, 32, 56, .16);
 	--aq-down: #1a6fe0;
 	--aq-up: #d9690f;
 	--aq-third: #c4302b;
@@ -861,8 +862,8 @@ html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
  *  Glow: light on surfaces, never on controls. A richer wash at the top of the page, the header
  *  ending in an accent hairline that fades out at both ends, cards lit from their top edge with an accent
  *  glow whose spot changes from card to card, and a brighter glow behind the travel panel's device card.
- *  Dark mode carries it; light mode only gets the hairline. Nested sections stay flat (one card, not a
- *  card in a card). Delete this block for a flat look.
+ *  Both modes carry it: dark glows lighter than its slate, Chambray glows a deeper blue than its tint.
+ *  Nested sections stay flat (one card, not a card in a card). Delete this block for a flat look.
  * ================================================================== */
 
 [data-theme="aquamarine"][data-darkmode="true"] body {
@@ -870,6 +871,34 @@ html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
 		radial-gradient(800px 380px at 12% -120px, rgba(79, 211, 224, .12), transparent 70%) no-repeat,
 		radial-gradient(1300px 560px at 62% -240px, rgba(75, 155, 255, .24), transparent 70%) no-repeat,
 		var(--aq-page);
+}
+
+[data-theme="aquamarine"]:not([data-darkmode="true"]) body {
+	background:
+		radial-gradient(800px 380px at 12% -120px, rgba(63, 200, 216, .17), transparent 70%) no-repeat,
+		radial-gradient(1300px 560px at 62% -240px, rgba(26, 111, 224, .24), transparent 70%) no-repeat,
+		linear-gradient(180deg, #c0d5ea 0, var(--aq-page) 460px) no-repeat,
+		var(--aq-page);
+}
+
+/* the travel panel painted the page colour over the body, which hid the wash on its page in both modes */
+[data-theme="aquamarine"] .travel-panel {
+	background: transparent;
+}
+
+/* Chambray's tabs: the base layer starts the tab shelf and the tab faces from pure white
+   (--background-color-high, which also colours text on buttons, so it stays white). On a tinted page that
+   white was a stripe beside the last tab, so tabs start from the card colour instead. */
+[data-theme="aquamarine"]:not([data-darkmode="true"]) :is(.tabs, .cbi-tabmenu) {
+	--tab-bar-background-color: var(--aq-card);
+	--tab-inactive-hover-background-color: var(--aq-card);
+	--tab-active-background-color: var(--aq-card);
+}
+
+@media screen and (max-width: 800px) {
+	[data-theme="aquamarine"]:not([data-darkmode="true"]) :is(.tabs, .cbi-tabmenu) {
+		background-image: linear-gradient(var(--aq-card) 20%, var(--border-color-medium) 100%);
+	}
 }
 
 /* the header is sticky, so the hairline is a background layer, not a positioned pseudo-element */
@@ -891,25 +920,41 @@ html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
 	box-shadow: var(--aq-shadow), inset 0 1px 0 rgba(140, 190, 255, .12);
 }
 
+[data-theme="aquamarine"]:not([data-darkmode="true"]) .cbi-section,
+[data-theme="aquamarine"]:not([data-darkmode="true"]) .cbi-map > fieldset,
+[data-theme="aquamarine"]:not([data-darkmode="true"]) .cbi-tblsection,
+[data-theme="aquamarine"]:not([data-darkmode="true"]) .travel-panel .tp-card {
+	--aq-glow-at: 0% 0%;
+	background-image: radial-gradient(560px 240px at var(--aq-glow-at), rgba(26, 111, 224, .13), transparent 70%);
+	box-shadow: var(--aq-shadow), 0 6px 20px rgba(26, 111, 224, .08), inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
 /* where the glow sits: a five-step cycle over each card's place among its siblings, so neighbours never
  * glow from the same spot and nothing moves between visits; places 1, 6, 11 keep the top left */
-[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+2) {
+[data-theme="aquamarine"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+2) {
 	--aq-glow-at: 100% 0%;
 }
 
-[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+3) {
+[data-theme="aquamarine"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+3) {
 	--aq-glow-at: 20% 100%;
 }
 
-[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+4) {
+[data-theme="aquamarine"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n+4) {
 	--aq-glow-at: 70% 0%;
 }
 
-[data-theme="aquamarine"][data-darkmode="true"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n) {
+[data-theme="aquamarine"] :is(.cbi-section, .cbi-map > fieldset, .cbi-tblsection, .travel-panel .tp-card):nth-child(5n) {
 	--aq-glow-at: 100% 100%;
 }
 
 /* the device card at the top: a brighter glow, aquamarine into blue, behind the router tile */
+[data-theme="aquamarine"]:not([data-darkmode="true"]) .travel-panel .tp-head {
+	background:
+		radial-gradient(480px 200px at 8% 50%, rgba(63, 200, 216, .17), transparent 70%),
+		radial-gradient(700px 260px at 55% -40%, rgba(26, 111, 224, .15), transparent 70%),
+		var(--tp-card);
+}
+
 [data-theme="aquamarine"][data-darkmode="true"] .travel-panel .tp-head {
 	background:
 		radial-gradient(480px 200px at 8% 50%, rgba(79, 211, 224, .16), transparent 70%),
@@ -918,14 +963,14 @@ html[data-theme="aquamarine"][data-darkmode="true"] .travel-panel {
 	box-shadow: var(--aq-shadow), inset 0 1px 0 rgba(140, 190, 255, .16);
 }
 
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-section .cbi-section,
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-section .cbi-tblsection,
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-value > .cbi-section,
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-value > .cbi-tblsection,
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-tab .cbi-section,
-[data-theme="aquamarine"][data-darkmode="true"] .cbi-section-node .cbi-section,
-[data-theme="aquamarine"][data-darkmode="true"] #modal_overlay .cbi-section,
-[data-theme="aquamarine"][data-darkmode="true"] #modal_overlay .cbi-map > fieldset {
+[data-theme="aquamarine"] .cbi-section .cbi-section,
+[data-theme="aquamarine"] .cbi-section .cbi-tblsection,
+[data-theme="aquamarine"] .cbi-value > .cbi-section,
+[data-theme="aquamarine"] .cbi-value > .cbi-tblsection,
+[data-theme="aquamarine"] .cbi-tab .cbi-section,
+[data-theme="aquamarine"] .cbi-section-node .cbi-section,
+[data-theme="aquamarine"] #modal_overlay .cbi-section,
+[data-theme="aquamarine"] #modal_overlay .cbi-map > fieldset {
 	background-image: none;
 	box-shadow: none;
 }
