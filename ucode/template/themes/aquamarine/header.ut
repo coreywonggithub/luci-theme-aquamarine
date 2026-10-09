@@ -13,7 +13,8 @@
 	const boardinfo = ubus.call('system', 'board');
 	// Bump on every theme change: stylesheet URLs carry it, so browsers fetch
 	// the new CSS after an upgrade instead of reusing a cached copy.
-	const aq_rev = '2026100801';
+	// the package's version: browsers cache the stylesheets by it (test/install-test.sh checks it matches)
+	const aq_rev = '1.0.1-r2';
 	// "Aquamarine" follows the device's light or dark setting; the two variants fix one.
 	const darkpref = (theme == 'aquamarine-dark' ? 'true' : (theme == 'aquamarine-light' ? 'false' : null));
 

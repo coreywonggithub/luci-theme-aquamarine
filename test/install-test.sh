@@ -63,6 +63,16 @@ for v in aquamarine aquamarine-dark aquamarine-light; do
 	check "1 install: /www/luci-static/$v has the stylesheet" "$(ls /www/luci-static/$v/aquamarine.css 2>/dev/null)" "/www/luci-static/$v/aquamarine.css"
 	check "1 install: template folder $v has a header" "$(ls /usr/share/ucode/luci/template/themes/$v/header.ut 2>/dev/null)" "/usr/share/ucode/luci/template/themes/$v/header.ut"
 done
+# The page asks for its stylesheets with ?v=<aq_rev>, and browsers cache them by it: 1.0.1-r1 changed a
+# stylesheet but not the tag, so a browser could keep the old one (2026-10-09). The tag is the version.
+if command -v apk >/dev/null; then
+	# every installed package as name-version (with a name, apk info prints its description instead)
+	ver=$(apk info -v 2>/dev/null | sed -n 's/^luci-theme-aquamarine-\([0-9].*\)/\1/p' | head -n 1)
+else
+	ver=$(opkg status luci-theme-aquamarine 2>/dev/null | sed -n 's/^Version: //p')
+fi
+rev=$(sed -n "s/^[[:space:]]*const aq_rev = '\(.*\)';/\1/p" /usr/share/ucode/luci/template/themes/aquamarine/header.ut)
+check "1 install: the stylesheet tag is the package version" "$rev" "$ver"
 
 # 2. a firmware upgrade that keeps settings runs the first-boot script again, without PKG_UPGRADE
 uci set luci.main.mediaurlbase="$before"; uci commit luci
